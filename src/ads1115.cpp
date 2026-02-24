@@ -123,15 +123,26 @@ bool ADS1115::disableComparator() {
 }
 
 bool ADS1115::enableConversionReady(CompQueue queue) {
-    // Per datasheet §6: Hi_thresh MSB=1 (0x8000), Lo_thresh MSB=0 (0x0000)
-    // COMP_QUE must not be DISABLED.
-    // TODO: write threshold registers and update config
-    (void)queue;
-    return false;
+    if (queue == CompQueue::DISABLED) {
+        last_error_ = Error::InvalidArgument;
+        return false;
+    }
+
+    // Datasheet §6: Hi_thresh MSB=1 (0x8000), Lo_thresh MSB=0 (0x0000).
+    // ALERT/RDY then pulses ~8µs after each conversion (continuous) or
+    // asserts low after conversion completes (single-shot).
+    if (!writeRegister(reg::HI_THRESH, 0x8000)) return false;
+    if (!writeRegister(reg::LO_THRESH, 0x0000)) return false;
+
+    comp_queue_ = queue;
+    return writeRegister(reg::CONFIG, buildConfig());
 }
 
 bool ADS1115::setThresholds(int16_t lo, int16_t hi) {
-    // TODO: validate lo < hi
+    if (hi <= lo) {
+        last_error_ = Error::InvalidArgument;
+        return false;
+    }
     if (!writeRegister(reg::LO_THRESH, static_cast<uint16_t>(lo))) return false;
     if (!writeRegister(reg::HI_THRESH, static_cast<uint16_t>(hi))) return false;
     return true;

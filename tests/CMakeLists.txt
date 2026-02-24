@@ -12,6 +12,7 @@ add_executable(ads1115_tests
     test_voltage_conversion.cpp
     test_wait_for_conversion.cpp
     test_comparator.cpp
+    test_thresholds.cpp
 )
 
 target_link_libraries(ads1115_tests
