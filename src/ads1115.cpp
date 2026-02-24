@@ -12,8 +12,14 @@ ADS1115::ADS1115(II2CDevice& i2c) : i2c_(i2c) {}
 
 Error ADS1115::begin(Address addr) {
     address_ = addr;
-    // TODO: wait 50 µs post power-up
-    // TODO: verify comms by reading config register and comparing to known reset value
+
+    std::this_thread::sleep_for(std::chrono::microseconds{50});
+
+    auto val = readRegister(reg::CONFIG);
+    if (!val) return last_error_;  // I2CWriteFailed or I2CReadFailed already set
+
+    if (*val != config::DEFAULT) return Error::UnexpectedDevice;
+
     return Error::None;
 }
 

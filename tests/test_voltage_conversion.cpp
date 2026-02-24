@@ -42,7 +42,8 @@ TEST_CASE("toVoltage: known value 1.0 V with ±2.048V PGA", "[voltage]") {
 TEST_CASE("readVoltage uses current PGA setting", "[voltage][integration]") {
     MockI2CDevice mock;
     ADS1115 adc{mock};
-    (void)adc.begin();
+    mock.enqueueRead({0x85, 0x83});  // for begin() config verify
+    REQUIRE(adc.begin() == Error::None);
     adc.setPGA(PGA::FSR_1024);
 
     // Queue a raw value of 8000 for the CONVERSION register read

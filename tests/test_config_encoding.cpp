@@ -6,6 +6,14 @@
 using namespace ads1115;
 using namespace ads1115::test;
 
+// Queue the reset config value so begin() succeeds, then clear the write log
+// so individual tests only see writes from their own operations.
+static void beginOK(MockI2CDevice& mock, ADS1115& adc) {
+    mock.enqueueRead({0x85, 0x83});  // config::DEFAULT big-endian
+    REQUIRE(adc.begin() == Error::None);
+    mock.clearWrites();
+}
+
 // Helper: extract the uint16_t written to a register from a 3-byte write payload.
 static uint16_t extractRegValue(const std::vector<uint8_t>& w) {
     REQUIRE(w.size() == 3);
@@ -21,7 +29,7 @@ static uint8_t extractRegAddr(const std::vector<uint8_t>& w) {
 TEST_CASE("Default config register is assembled correctly", "[config]") {
     MockI2CDevice mock;
     ADS1115 adc{mock};
-    (void)adc.begin();
+    beginOK(mock, adc);
 
     (void)adc.startConversion();
     REQUIRE(mock.writes().size() == 1);
@@ -46,7 +54,7 @@ TEST_CASE("Default config register is assembled correctly", "[config]") {
 TEST_CASE("MUX bits are encoded correctly", "[config]") {
     MockI2CDevice mock;
     ADS1115 adc{mock};
-    (void)adc.begin();
+    beginOK(mock, adc);
 
     SECTION("DIFF_0_1") {
         adc.setMux(Mux::DIFF_0_1);
@@ -65,7 +73,7 @@ TEST_CASE("MUX bits are encoded correctly", "[config]") {
 TEST_CASE("PGA bits are encoded correctly", "[config]") {
     MockI2CDevice mock;
     ADS1115 adc{mock};
-    (void)adc.begin();
+    beginOK(mock, adc);
 
     SECTION("FSR_6144") {
         adc.setPGA(PGA::FSR_6144);
@@ -84,7 +92,7 @@ TEST_CASE("PGA bits are encoded correctly", "[config]") {
 TEST_CASE("Data rate bits are encoded correctly", "[config]") {
     MockI2CDevice mock;
     ADS1115 adc{mock};
-    (void)adc.begin();
+    beginOK(mock, adc);
 
     adc.setDataRate(DataRate::SPS_860);
     (void)adc.startConversion();
@@ -95,7 +103,7 @@ TEST_CASE("Data rate bits are encoded correctly", "[config]") {
 TEST_CASE("Continuous mode clears MODE bit", "[config]") {
     MockI2CDevice mock;
     ADS1115 adc{mock};
-    (void)adc.begin();
+    beginOK(mock, adc);
 
     adc.setMode(Mode::CONTINUOUS);
     (void)adc.startConversion();
@@ -106,9 +114,8 @@ TEST_CASE("Continuous mode clears MODE bit", "[config]") {
 TEST_CASE("writeRegister sends 3 bytes in big-endian order", "[i2c]") {
     MockI2CDevice mock;
     ADS1115 adc{mock};
-    (void)adc.begin();
+    beginOK(mock, adc);
 
-    // startConversion triggers a writeRegister(CONFIG, ...) call
     (void)adc.startConversion();
     REQUIRE(mock.writes().size() == 1);
     const auto& w = mock.writes()[0];
@@ -117,4 +124,36 @@ TEST_CASE("writeRegister sends 3 bytes in big-endian order", "[i2c]") {
     const uint16_t reconstructed =
         (static_cast<uint16_t>(w[1]) << 8) | w[2];
     CHECK(reconstructed != 0);  // sanity: something non-zero was written
+}
+
+// ── begin() tests ─────────────────────────────────────────────────────────────
+
+TEST_CASE("begin() returns None when config register matches reset value", "[begin]") {
+    MockI2CDevice mock;
+    ADS1115 adc{mock};
+    mock.enqueueRead({0x85, 0x83});
+    CHECK(adc.begin() == Error::None);
+}
+
+TEST_CASE("begin() returns UnexpectedDevice when config register is wrong", "[begin]") {
+    MockI2CDevice mock;
+    ADS1115 adc{mock};
+    mock.enqueueRead({0x00, 0x00});  // not the reset value
+    CHECK(adc.begin() == Error::UnexpectedDevice);
+}
+
+TEST_CASE("begin() returns I2CReadFailed when read fails", "[begin]") {
+    MockI2CDevice mock;
+    ADS1115 adc{mock};
+    mock.read_ok = false;
+    const Error e = adc.begin();
+    CHECK(e == Error::I2CReadFailed);
+}
+
+TEST_CASE("begin() returns I2CWriteFailed when write fails", "[begin]") {
+    MockI2CDevice mock;
+    ADS1115 adc{mock};
+    mock.write_ok = false;
+    const Error e = adc.begin();
+    CHECK(e == Error::I2CWriteFailed);
 }

@@ -84,6 +84,7 @@ enum class Error {
     I2CReadFailed,
     ConversionTimeout,
     InvalidArgument,
+    UnexpectedDevice,   // config register doesn't match reset value on begin()
 };
 
 // ── Register addresses ────────────────────────────────────────────────────────
