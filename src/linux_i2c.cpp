@@ -9,7 +9,7 @@
 
 namespace ads1115 {
 
-LinuxI2CDevice::LinuxI2CDevice(int bus_num, uint8_t address) {
+LinuxI2CDevice::LinuxI2CDevice(int bus_num, uint8_t address) : bus_num_(bus_num) {
     const std::string path = "/dev/i2c-" + std::to_string(bus_num);
 
     fd_ = ::open(path.c_str(), O_RDWR);
@@ -34,6 +34,21 @@ bool LinuxI2CDevice::write(const uint8_t* data, std::size_t len) {
 
 bool LinuxI2CDevice::read(uint8_t* data, std::size_t len) {
     return ::read(fd_, data, len) == static_cast<ssize_t>(len);
+}
+
+bool LinuxI2CDevice::generalCallReset() {
+    // Open a separate fd so the slave address on fd_ is not disturbed.
+    const std::string path = "/dev/i2c-" + std::to_string(bus_num_);
+    const int gc_fd = ::open(path.c_str(), O_RDWR);
+    if (gc_fd < 0) return false;
+
+    bool ok = false;
+    if (::ioctl(gc_fd, I2C_SLAVE, 0x00) >= 0) {
+        const uint8_t cmd = 0x06;
+        ok = (::write(gc_fd, &cmd, 1) == 1);
+    }
+    ::close(gc_fd);
+    return ok;
 }
 
 }  // namespace ads1115

@@ -25,7 +25,12 @@ public:
     bool write(const uint8_t* data, std::size_t len) override;
     bool read(uint8_t* data, std::size_t len) override;
 
+    /// Opens a temporary fd to address 0x00 and sends the general call reset
+    /// command (0x06). Does not affect the main fd or slave address.
+    bool generalCallReset() override;
+
 private:
+    int bus_num_{-1};
     int fd_{-1};
 };
 

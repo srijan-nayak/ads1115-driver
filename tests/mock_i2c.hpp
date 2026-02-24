@@ -34,6 +34,7 @@ public:
 
     bool write_ok{true};
     bool read_ok{true};
+    bool reset_ok{true};
 
     // ── II2CDevice ────────────────────────────────────────────────────────────
 
@@ -41,6 +42,13 @@ public:
         if (write_ok) writes_.emplace_back(data, data + len);
         return write_ok;
     }
+
+    bool generalCallReset() override {
+        if (reset_ok) reset_call_count_++;
+        return reset_ok;
+    }
+
+    int resetCallCount() const { return reset_call_count_; }
 
     bool read(uint8_t* data, std::size_t len) override {
         if (!read_ok || read_queue_.empty()) return false;
@@ -54,6 +62,7 @@ public:
 private:
     std::vector<std::vector<uint8_t>> writes_;
     std::queue<std::vector<uint8_t>>  read_queue_;
+    int reset_call_count_{0};
 };
 
 }  // namespace ads1115::test

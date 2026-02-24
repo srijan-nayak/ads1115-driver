@@ -151,11 +151,7 @@ bool ADS1115::setThresholds(int16_t lo, int16_t hi) {
 // ── Utility ───────────────────────────────────────────────────────────────────
 
 bool ADS1115::reset() {
-    // I2C general call reset: send [0x00, 0x06] to address 0x00
-    // TODO: the current II2CDevice interface targets a single slave address;
-    //       general call needs to send to address 0x00 — either bypass via a
-    //       separate write or extend the interface.
-    return false;
+    return i2c_.generalCallReset();
 }
 
 float ADS1115::toVoltage(int16_t raw, PGA pga) {
