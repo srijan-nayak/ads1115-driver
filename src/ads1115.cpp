@@ -97,17 +97,29 @@ std::optional<int16_t> ADS1115::readRawContinuous() {
 
 bool ADS1115::setComparator(CompMode mode, CompPolarity polarity, CompLatch latch,
                              CompQueue queue, int16_t lo_thresh, int16_t hi_thresh) {
-    // TODO: validate hi_thresh > lo_thresh
-    // TODO: write Lo_thresh, Hi_thresh registers
-    // TODO: update config register with comparator settings
-    (void)mode; (void)polarity; (void)latch; (void)queue;
-    (void)lo_thresh; (void)hi_thresh;
-    return false;
+    if (hi_thresh <= lo_thresh) {
+        last_error_ = Error::InvalidArgument;
+        return false;
+    }
+
+    if (!writeRegister(reg::LO_THRESH, static_cast<uint16_t>(lo_thresh))) return false;
+    if (!writeRegister(reg::HI_THRESH, static_cast<uint16_t>(hi_thresh))) return false;
+
+    comp_mode_     = mode;
+    comp_polarity_ = polarity;
+    comp_latch_    = latch;
+    comp_queue_    = queue;
+
+    return writeRegister(reg::CONFIG, buildConfig());
 }
 
 bool ADS1115::disableComparator() {
-    // TODO: rebuild config with COMP_QUE=DISABLED, write it
-    return false;
+    comp_mode_     = CompMode::TRADITIONAL;
+    comp_polarity_ = CompPolarity::ACTIVE_LOW;
+    comp_latch_    = CompLatch::NON_LATCHING;
+    comp_queue_    = CompQueue::DISABLED;
+
+    return writeRegister(reg::CONFIG, buildConfig());
 }
 
 bool ADS1115::enableConversionReady(CompQueue queue) {
@@ -175,7 +187,10 @@ uint16_t ADS1115::buildConfig() const {
          | static_cast<uint16_t>(pga_)
          | static_cast<uint16_t>(mode_)
          | static_cast<uint16_t>(dr_)
-         | config::COMP_DISABLED;
+         | static_cast<uint16_t>(comp_mode_)
+         | static_cast<uint16_t>(comp_polarity_)
+         | static_cast<uint16_t>(comp_latch_)
+         | static_cast<uint16_t>(comp_queue_);
 }
 
 }  // namespace ads1115

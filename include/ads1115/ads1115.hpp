@@ -93,12 +93,16 @@ private:
 
     II2CDevice& i2c_;
 
-    Address  address_{Address::GND};
-    Mux      mux_{Mux::SINGLE_0};
-    PGA      pga_{PGA::FSR_2048};
-    DataRate dr_{DataRate::SPS_128};
-    Mode     mode_{Mode::SINGLE_SHOT};
-    Error    last_error_{Error::None};
+    Address      address_{Address::GND};
+    Mux          mux_{Mux::SINGLE_0};
+    PGA          pga_{PGA::FSR_2048};
+    DataRate     dr_{DataRate::SPS_128};
+    Mode         mode_{Mode::SINGLE_SHOT};
+    CompMode     comp_mode_{CompMode::TRADITIONAL};
+    CompPolarity comp_polarity_{CompPolarity::ACTIVE_LOW};
+    CompLatch    comp_latch_{CompLatch::NON_LATCHING};
+    CompQueue    comp_queue_{CompQueue::DISABLED};
+    Error        last_error_{Error::None};
 };
 
 }  // namespace ads1115
