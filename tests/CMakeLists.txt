@@ -10,6 +10,7 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(ads1115_tests
     test_config_encoding.cpp
     test_voltage_conversion.cpp
+    test_wait_for_conversion.cpp
 )
 
 target_link_libraries(ads1115_tests

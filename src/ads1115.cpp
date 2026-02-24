@@ -6,6 +6,21 @@
 
 namespace ads1115 {
 
+// Conversion time for a given data rate, with ~10% margin for oscillator tolerance.
+static std::chrono::milliseconds conversionDelay(DataRate dr) {
+    switch (dr) {
+        case DataRate::SPS_8:   return std::chrono::milliseconds{138};
+        case DataRate::SPS_16:  return std::chrono::milliseconds{69};
+        case DataRate::SPS_32:  return std::chrono::milliseconds{35};
+        case DataRate::SPS_64:  return std::chrono::milliseconds{18};
+        case DataRate::SPS_128: return std::chrono::milliseconds{9};
+        case DataRate::SPS_250: return std::chrono::milliseconds{5};
+        case DataRate::SPS_475: return std::chrono::milliseconds{3};
+        case DataRate::SPS_860: return std::chrono::milliseconds{2};
+    }
+    return std::chrono::milliseconds{10};
+}
+
 ADS1115::ADS1115(II2CDevice& i2c) : i2c_(i2c) {}
 
 // ── Setup ─────────────────────────────────────────────────────────────────────
@@ -37,8 +52,19 @@ bool ADS1115::startConversion() {
 }
 
 bool ADS1115::waitForConversion(std::chrono::milliseconds timeout) {
-    // TODO: poll OS bit in config register, sleep between polls, respect timeout
-    (void)timeout;
+    const auto deadline      = std::chrono::steady_clock::now() + timeout;
+    const auto poll_interval = conversionDelay(dr_);
+
+    while (std::chrono::steady_clock::now() < deadline) {
+        std::this_thread::sleep_for(poll_interval);
+
+        auto val = readRegister(reg::CONFIG);
+        if (!val) return false;  // last_error_ already set by readRegister
+
+        if (*val & config::OS_IDLE) return true;
+    }
+
+    last_error_ = Error::ConversionTimeout;
     return false;
 }
 
