@@ -39,6 +39,39 @@ TEST_CASE("toVoltage: known value 1.0 V with ±2.048V PGA", "[voltage]") {
     CHECK(ADS1115::toVoltage(16000, PGA::FSR_2048) == Approx(1.0f).epsilon(1e-4));
 }
 
+TEST_CASE("toRaw: zero voltage produces 0", "[voltage]") {
+    CHECK(ADS1115::toRaw(0.0f, PGA::FSR_2048) == 0);
+}
+
+TEST_CASE("toRaw: known value 1.0 V with ±2.048V PGA", "[voltage]") {
+    // 1.0 V / 62.5e-6 = 16000 counts
+    CHECK(ADS1115::toRaw(1.0f, PGA::FSR_2048) == 16000);
+}
+
+TEST_CASE("toRaw: negative voltage produces negative code", "[voltage]") {
+    // -1.0 V / 62.5e-6 = -16000 counts
+    CHECK(ADS1115::toRaw(-1.0f, PGA::FSR_2048) == -16000);
+}
+
+TEST_CASE("toRaw: LSB size per PGA setting", "[voltage]") {
+    // One LSB of voltage should round-trip to exactly 1 raw count.
+    CHECK(ADS1115::toRaw(187.5e-6f, PGA::FSR_6144) == 1);
+    CHECK(ADS1115::toRaw(125.0e-6f, PGA::FSR_4096) == 1);
+    CHECK(ADS1115::toRaw(62.5e-6f,  PGA::FSR_2048) == 1);
+    CHECK(ADS1115::toRaw(31.25e-6f, PGA::FSR_1024) == 1);
+    CHECK(ADS1115::toRaw(15.625e-6f, PGA::FSR_0512) == 1);
+    CHECK(ADS1115::toRaw(7.8125e-6f, PGA::FSR_0256) == 1);
+}
+
+TEST_CASE("toRaw/toVoltage round-trip", "[voltage]") {
+    // Converting raw → voltage → raw should recover the original code.
+    const int16_t codes[] = {-32768, -16000, -1, 0, 1, 16000, 32767};
+    for (int16_t code : codes) {
+        const float v = ADS1115::toVoltage(code, PGA::FSR_2048);
+        CHECK(ADS1115::toRaw(v, PGA::FSR_2048) == code);
+    }
+}
+
 TEST_CASE("readVoltage uses current PGA setting", "[voltage][integration]") {
     MockI2CDevice mock;
     ADS1115 adc{mock};

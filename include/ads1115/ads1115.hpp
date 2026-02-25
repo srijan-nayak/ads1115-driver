@@ -102,6 +102,11 @@ public:
     /// Pure conversion: raw ADC code → voltage (V) for the given PGA setting.
     [[nodiscard]] static float toVoltage(int16_t raw, PGA pga);
 
+    /// Pure conversion: voltage (V) → raw ADC code for the given PGA setting.
+    /// Inverse of toVoltage(). Use this to compute threshold arguments for
+    /// setComparator() and setThresholds() from human-readable voltage values.
+    [[nodiscard]] static int16_t toRaw(float voltage, PGA pga);
+
 private:
     [[nodiscard]] bool                    writeRegister(uint8_t reg, uint16_t value);
     [[nodiscard]] std::optional<uint16_t> readRegister(uint8_t reg);
