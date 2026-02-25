@@ -36,6 +36,10 @@ public:
     [[nodiscard]] bool waitForConversion(
         std::chrono::milliseconds timeout = std::chrono::milliseconds{500});
 
+    /// Non-blocking check: returns true if conversion is complete, false if
+    /// still in progress, or nullopt on I2C error.
+    [[nodiscard]] std::optional<bool> isConversionReady();
+
     /// Read the 16-bit signed raw conversion result.
     [[nodiscard]] std::optional<int16_t> readRaw();
 

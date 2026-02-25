@@ -68,6 +68,12 @@ bool ADS1115::waitForConversion(std::chrono::milliseconds timeout) {
     return false;
 }
 
+std::optional<bool> ADS1115::isConversionReady() {
+    auto val = readRegister(reg::CONFIG);
+    if (!val) return std::nullopt;
+    return static_cast<bool>(*val & config::OS_IDLE);
+}
+
 std::optional<int16_t> ADS1115::readRaw() {
     auto val = readRegister(reg::CONVERSION);
     if (!val) return std::nullopt;

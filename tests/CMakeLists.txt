@@ -15,6 +15,7 @@ add_executable(ads1115_tests
     test_thresholds.cpp
     test_reset.cpp
     test_read_channel.cpp
+    test_is_conversion_ready.cpp
 )
 
 target_link_libraries(ads1115_tests
