@@ -9,6 +9,16 @@
 
 namespace ads1115 {
 
+/// Driver for the TI ADS1115 16-bit I2C ADC.
+///
+/// Error handling contract:
+///   - All I2C failures set lastError() and cause an immediate early return.
+///   - Methods returning bool     → false on failure.
+///   - Methods returning optional → nullopt on failure.
+///   - Configuration setters (setMux, setPGA, …) are pure state updates with
+///     no I2C traffic and therefore never fail.
+///   - Call lastError() after any failure to distinguish error types.
+///   - begin() must be called successfully before any ADC operation.
 class ADS1115 {
 public:
     explicit ADS1115(II2CDevice& i2c);
