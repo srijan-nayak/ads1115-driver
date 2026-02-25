@@ -80,6 +80,10 @@ public:
 
     // ── Utility ──────────────────────────────────────────────────────────────
 
+    /// Switch to single-shot mode without triggering a conversion, leaving the
+    /// device in its low-power idle state. Primary use: stop continuous mode.
+    [[nodiscard]] bool powerDown();
+
     /// Issue I2C general call reset (0x00, 0x06). Resets all devices on bus.
     [[nodiscard]] bool reset();
 

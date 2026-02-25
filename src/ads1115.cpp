@@ -156,6 +156,11 @@ bool ADS1115::setThresholds(int16_t lo, int16_t hi) {
 
 // ── Utility ───────────────────────────────────────────────────────────────────
 
+bool ADS1115::powerDown() {
+    mode_ = Mode::SINGLE_SHOT;
+    return writeRegister(reg::CONFIG, buildConfig());  // OS bit not set → no conversion
+}
+
 bool ADS1115::reset() {
     return i2c_.generalCallReset();
 }
