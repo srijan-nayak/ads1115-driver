@@ -1,4 +1,26 @@
+# Build
 /build
-/tags
 /compile_commands.json
+
+# ctags / cscope
+/tags
+/cscope.out
+
+# clangd
 /.cache
+
+# Editor swap files
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# IDE directories
+.vscode/
+.idea/
+
+# C++ build artifacts (if building outside the CMake tree)
+*.o
+*.a
