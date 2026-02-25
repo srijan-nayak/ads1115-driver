@@ -12,8 +12,15 @@ CMake (minimum 3.16). Standard layout:
 ```
 ads1115-driver/
   CMakeLists.txt
-  include/ads1115/      # public headers
+  cmake/                # package config template (ads1115Config.cmake.in)
+  include/ads1115/      # public headers (all installed)
+    ads1115.hpp         # main driver class
+    types.hpp           # enums, constants, Error, LSB table
+    i2c_interface.hpp   # II2CDevice abstract interface
+    linux_i2c.hpp       # LinuxI2CDevice — Linux i2c-dev backend (public, users instantiate it)
   src/                  # implementation
+    ads1115.cpp
+    linux_i2c.cpp
   tests/                # unit tests (host, no hardware required)
   examples/             # usage examples for RPi
 ```
@@ -23,6 +30,7 @@ Build commands:
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ctest --test-dir build
+cmake --install build --prefix /usr/local
 ```
 
 ## Language & Style
@@ -49,8 +57,8 @@ Use the Linux kernel `i2c-dev` interface via `ioctl`:
 ## Key Design Decisions
 
 - **No exceptions** — all I2C errors return via `std::optional<T>` or an error enum
-- **Blocking and non-blocking reads** — `readChannelBlocking()` polls/sleeps internally; `startConversion()` + `isReady()` + `readRaw()` for async use
-- **Conversion-ready via ALERT/RDY** — supported by writing special threshold values (`Hi=0x8000`, `Lo=0x0000`) and wiring GPIO interrupt; driver exposes the threshold config, GPIO handling is left to the caller
+- **Blocking and non-blocking reads** — `readChannel()` blocks internally; `startConversion()` + `isConversionReady()` + `readRaw()` for non-blocking use
+- **Conversion-ready via ALERT/RDY** — supported by writing special threshold values (`Hi=0x8000`, `Lo=0x0000`) and wiring GPIO interrupt; driver exposes the threshold config via `enableConversionReady()`, GPIO handling is left to the caller
 - **No global state** — driver is a class; multiple instances allowed for multi-device buses
 
 ## Register/Enum Conventions
@@ -73,7 +81,7 @@ LSB sizes per PGA setting are in `ADS1115_driver_reference.md` Section 11.
 - Unit tests run on the host (no hardware) using a mock/stub I2C backend injected via a thin interface
 - Test: register encoding, voltage conversion math, single-shot sequence, comparator config
 - Hardware-in-loop tests go in `examples/` (not in `tests/`)
-- Preferred test framework: **Catch2** (header-only, no extra deps)
+- Preferred test framework: **Catch2 v3** (fetched via CMake `FetchContent`)
 
 ## Important Hardware Notes
 
