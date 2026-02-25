@@ -15,9 +15,9 @@ public:
 
     // ── Setup ────────────────────────────────────────────────────────────────
 
-    /// Open the device at the given I2C address.
-    /// Waits 50 µs for power-up, then verifies comms by reading the config reg.
-    [[nodiscard]] Error begin(Address addr = Address::GND);
+    /// Initialise the driver: wait 50 µs for power-up, then verify comms by
+    /// reading the config register. The I2C address is owned by II2CDevice.
+    [[nodiscard]] Error begin();
 
     // ── Configuration setters (update local state; no I2C traffic) ───────────
 
@@ -101,7 +101,6 @@ private:
 
     II2CDevice& i2c_;
 
-    Address      address_{Address::GND};
     Mux          mux_{Mux::SINGLE_0};
     PGA          pga_{PGA::FSR_2048};
     DataRate     dr_{DataRate::SPS_128};

@@ -25,9 +25,7 @@ ADS1115::ADS1115(II2CDevice& i2c) : i2c_(i2c) {}
 
 // ── Setup ─────────────────────────────────────────────────────────────────────
 
-Error ADS1115::begin(Address addr) {
-    address_ = addr;
-
+Error ADS1115::begin() {
     std::this_thread::sleep_for(std::chrono::microseconds{50});
 
     auto val = readRegister(reg::CONFIG);
