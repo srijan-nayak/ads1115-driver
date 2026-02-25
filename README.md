@@ -48,6 +48,32 @@ This installs:
 - `include/ads1115/*.hpp`
 - `lib/cmake/ads1115/` — CMake package files for `find_package`
 
+### Installing on Raspberry Pi
+
+```sh
+# 1. Enable I2C (if not already done)
+sudo raspi-config   # Interface Options → I2C → Enable
+sudo reboot
+
+# 2. Install build tools
+sudo apt update
+sudo apt install cmake g++ git
+
+# 3. Add your user to the i2c group (avoids needing sudo for /dev/i2c-*)
+sudo usermod -aG i2c $USER
+newgrp i2c
+
+# 4. Clone, build, and install
+git clone <repo-url>
+cd ads1115-driver
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DADS1115_BUILD_TESTS=OFF
+cmake --build build
+sudo cmake --install build
+```
+
+> Disabling tests (`-DADS1115_BUILD_TESTS=OFF`) skips the Catch2 network fetch
+> and significantly speeds up the configure step on the Pi.
+
 To consume from another CMake project:
 
 ```cmake
