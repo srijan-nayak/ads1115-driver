@@ -24,6 +24,43 @@ target_compile_options(ads1115 PRIVATE -Wall -Wextra -Wpedantic)
 option(ADS1115_BUILD_TESTS    "Build unit tests" ON)
 option(ADS1115_BUILD_EXAMPLES "Build examples"   OFF)
 
+# ── Install ───────────────────────────────────────────────────────────────────
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+install(TARGETS ads1115
+    EXPORT  ads1115Targets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(DIRECTORY include/ads1115
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(EXPORT ads1115Targets
+    FILE      ads1115Targets.cmake
+    NAMESPACE ads1115::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ads1115
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/ads1115ConfigVersion.cmake"
+    VERSION       ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ads1115Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/ads1115Config.cmake"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ads1115
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/ads1115Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/ads1115ConfigVersion.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ads1115
+)
+
 # ── Subdirectories ────────────────────────────────────────────────────────────
 if(ADS1115_BUILD_TESTS)
     enable_testing()
