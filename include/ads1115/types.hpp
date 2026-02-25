@@ -5,11 +5,14 @@
 namespace ads1115 {
 
 // ── I2C Addresses ─────────────────────────────────────────────────────────────
+// Named constants for the four addresses selectable via the ADDR pin wiring.
+// Pass the corresponding uint8_t value when constructing an II2CDevice:
+//   LinuxI2CDevice i2c{1, static_cast<uint8_t>(Address::GND)};
 enum class Address : uint8_t {
-    GND = 0x48,
-    VDD = 0x49,
-    SDA = 0x4A,
-    SCL = 0x4B,
+    GND = 0x48,  // ADDR → GND
+    VDD = 0x49,  // ADDR → VDD
+    SDA = 0x4A,  // ADDR → SDA
+    SCL = 0x4B,  // ADDR → SCL
 };
 
 // ── Input Multiplexer (bits [14:12], pre-shifted) ────────────────────────────
