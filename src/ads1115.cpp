@@ -39,8 +39,8 @@ Error ADS1115::begin() {
 
 // ── Configuration ─────────────────────────────────────────────────────────────
 
-void ADS1115::setMux(Mux mux)         { mux_  = mux;  }
-void ADS1115::setPGA(PGA pga)         { pga_  = pga;  }
+void ADS1115::setMux(Mux mux)          { mux_  = mux;  }
+void ADS1115::setPGA(PGA pga)          { pga_  = pga;  }
 void ADS1115::setDataRate(DataRate dr) { dr_   = dr;   }
 void ADS1115::setMode(Mode mode)       { mode_ = mode; }
 
