@@ -64,7 +64,7 @@ sudo usermod -aG i2c $USER
 newgrp i2c
 
 # 4. Clone, build, and install
-git clone <repo-url>
+git clone https://github.com/srijan-nayak/ads1115-driver.git
 cd ads1115-driver
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DADS1115_BUILD_TESTS=OFF
 cmake --build build
