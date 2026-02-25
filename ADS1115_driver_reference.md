@@ -366,6 +366,7 @@ constexpr float ADS1115_LSB_uV[] = {
 };
 
 // Voltage (V) = (int16_t)raw_code * lsb_uV * 1e-6
+// Raw code    = lroundf(voltage / (lsb_uV * 1e-6))  ← use for threshold arguments
 ```
 
 ### Conversion-Ready via ALERT/RDY
@@ -405,10 +406,10 @@ float voltage = raw * lsb_uV * 1e-6f;
 - [ ] `readRaw()` → `int16_t` — read Conversion register
 - [ ] `readVoltage()` → `float` — readRaw × LSB
 - [ ] `readChannel(ch)` — combined: set MUX, trigger, wait, read (single-shot)
-- [ ] `setComparator(mode, pol, lat, que, lo, hi)` — configure comparator
-- [ ] `enableConvReadyPin(bool)` — configure ALERT/RDY as conv-ready
-- [ ] `setThresholds(lo, hi)` — write Lo/Hi_thresh registers
-- [ ] `reset()` — I²C general call reset (0x00, 0x06)
+- [ ] `setComparator(mode, pol, lat, que, lo, hi)` — configure comparator; lo/hi in raw ADC codes
+- [ ] `enableConversionReady(que)` — configure ALERT/RDY as conv-ready
+- [ ] `setThresholds(lo, hi)` — write Lo/Hi_thresh registers (raw ADC codes)
+- [ ] `toRaw(voltage, pga)` → `int16_t` — static: volts → raw code (inverse of toVoltage)
 - [ ] `powerDown()` — MODE=1 without OS=1 (already in power-down after single-shot)
 
 ---

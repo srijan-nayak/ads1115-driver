@@ -164,15 +164,15 @@ adc.powerDown();
 ### Threshold comparator
 
 ```cpp
-// Assert ALERT/RDY (active-low) when AIN0 exceeds 1.5 V
-// Thresholds are in raw ADC codes for the current PGA setting
-// ±2.048 V → 62.5 µV/LSB → 1.5 V ≈ 24000 counts
+// Assert ALERT/RDY (active-low) when AIN0 exceeds 1.5 V.
+// Use toRaw() to convert voltage thresholds to raw ADC codes.
 adc.setComparator(
     ads1115::CompMode::TRADITIONAL,
     ads1115::CompPolarity::ACTIVE_LOW,
     ads1115::CompLatch::NON_LATCHING,
     ads1115::CompQueue::AFTER_1,
-    /*lo=*/0, /*hi=*/24000);
+    /*lo=*/ads1115::ADS1115::toRaw(0.0f,  ads1115::PGA::FSR_2048),
+    /*hi=*/ads1115::ADS1115::toRaw(1.5f,  ads1115::PGA::FSR_2048));
 ```
 
 ### Conversion-ready via ALERT/RDY
@@ -212,6 +212,7 @@ adc.enableConversionReady(ads1115::CompQueue::AFTER_1);
 | `readVoltage()` | `optional<float>` | `readRaw()` converted to volts |
 | `readRawContinuous()` | `optional<int16_t>` | Latest result in continuous mode |
 | `toVoltage(raw, PGA)` | `float` | Static: raw code → volts |
+| `toRaw(voltage, PGA)` | `int16_t` | Static: volts → raw code (use for threshold arguments) |
 
 ### Comparator
 
@@ -227,7 +228,6 @@ adc.enableConversionReady(ads1115::CompQueue::AFTER_1);
 | Method | Description |
 |--------|-------------|
 | `powerDown()` | Enter low-power idle (stops continuous mode) |
-| `reset()` | I²C general call reset (all devices on bus) |
 | `lastError()` | Return last `Error` code |
 
 ### PGA / FSR Reference
