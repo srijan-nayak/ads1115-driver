@@ -1,6 +1,7 @@
 #include <ads1115/ads1115.hpp>
 #include <ads1115/types.hpp>
 
+#include <cassert>
 #include <thread>
 #include <chrono>
 
@@ -165,6 +166,8 @@ bool ADS1115::reset() {
 
 float ADS1115::toVoltage(int16_t raw, PGA pga) {
     const uint8_t idx = static_cast<uint8_t>(static_cast<uint16_t>(pga) >> 9);
+    static_assert(sizeof(LSB_UV) / sizeof(LSB_UV[0]) == 8);
+    assert(idx < 8);  // always true for any valid PGA enum value
     return raw * LSB_UV[idx] * 1e-6f;
 }
 

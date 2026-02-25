@@ -105,15 +105,20 @@ namespace config {
 
 // ── LSB sizes (µV) indexed by PGA[2:0] = bits[11:9] >> 9 ─────────────────────
 // V = (int16_t)raw * LSB_UV[pga_idx] * 1e-6f
+// Indices 5, 6, 7 are all ±0.256V: the datasheet maps PGA codes 101, 110, and
+// 111 to the same FSR. The full 8-entry array keeps the index expression
+// (pga_bits >> 9) safe for any 3-bit value without a bounds check.
 constexpr float LSB_UV[] = {
     187.5f,   // 0 → ±6.144V
     125.0f,   // 1 → ±4.096V
     62.5f,    // 2 → ±2.048V (default)
     31.25f,   // 3 → ±1.024V
     15.625f,  // 4 → ±0.512V
-    7.8125f,  // 5 → ±0.256V
-    7.8125f,  // 6 → ±0.256V
-    7.8125f,  // 7 → ±0.256V
+    7.8125f,  // 5 → ±0.256V  (PGA = 101)
+    7.8125f,  // 6 → ±0.256V  (PGA = 110)
+    7.8125f,  // 7 → ±0.256V  (PGA = 111)
 };
+static_assert(sizeof(LSB_UV) / sizeof(LSB_UV[0]) == 8,
+              "LSB_UV must have exactly 8 entries to cover all 3-bit PGA codes");
 
 }  // namespace ads1115
