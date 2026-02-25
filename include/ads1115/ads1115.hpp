@@ -94,9 +94,6 @@ public:
     /// device in its low-power idle state. Primary use: stop continuous mode.
     [[nodiscard]] bool powerDown();
 
-    /// Issue I2C general call reset (0x00, 0x06). Resets all devices on bus.
-    [[nodiscard]] bool reset();
-
     [[nodiscard]] Error lastError() const { return last_error_; }
 
     /// Pure conversion: raw ADC code → voltage (V) for the given PGA setting.

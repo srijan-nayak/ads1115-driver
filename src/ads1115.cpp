@@ -161,10 +161,6 @@ bool ADS1115::powerDown() {
     return writeRegister(reg::CONFIG, buildConfig());  // OS bit not set → no conversion
 }
 
-bool ADS1115::reset() {
-    return i2c_.generalCallReset();
-}
-
 float ADS1115::toVoltage(int16_t raw, PGA pga) {
     const uint8_t idx = static_cast<uint8_t>(static_cast<uint16_t>(pga) >> 9);
     static_assert(sizeof(LSB_UV) / sizeof(LSB_UV[0]) == 8);

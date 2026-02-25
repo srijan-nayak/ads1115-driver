@@ -13,7 +13,6 @@ add_executable(ads1115_tests
     test_wait_for_conversion.cpp
     test_comparator.cpp
     test_thresholds.cpp
-    test_reset.cpp
     test_read_channel.cpp
     test_is_conversion_ready.cpp
     test_power_down.cpp
